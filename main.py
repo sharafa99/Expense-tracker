@@ -88,7 +88,7 @@ while True:
     print("1. Add expense")
     print("2. View expenses")
     print("3. View spending summary")
-    print("4. View category sumary")
+    print("4. View category summary")
     print("5. Delete expense")
     print("6. Exit")
     print("\n")
@@ -202,21 +202,69 @@ while True:
             break
         
     if choice == 3:
-        print("View spending expense")
+        clear_terminal()
+        header("Spending Summary")
+        print("\n")
+
+        total_amount = expense_manager.calculate_total(expenses)
+        number_of_expenses = expense_manager.calculate_number_of_expenses(expenses)
+        average_expense = expense_manager.calculate_average(total_amount, number_of_expenses)
+        spending_summary = expense_manager.building_spending_summary(total_amount, number_of_expenses, average_expense)
+
+        print(f"Total expenses:{'':>10} ${spending_summary["Total spending"]}")
+        print(f"Number of expenses:{'':>6} {spending_summary["Number of expenses"]}")
+        print(f"Average expense:{'':>9} {spending_summary["Average expense"]}")
+        print("\n")
+
+        while True:
+            try:
+                back = input('Type "back" to return to the main menu: ').strip().lower()
+    
+                if back != "back":
+                    raise ValueError(f'Please type "back" when you are done viewing the expenses: ')
+    
+            except ValueError as e:
+                print(f"Error: {e}")
+                continue
+    
+            break
+        
 
     if choice == 4:
         print("View category expense")
-        
+
     if choice == 5:
         clear_terminal()
         header("Delete Expense")
         print("\n")
         view_expense(expenses)
         print("\n")
-        delete_text = int(input("Delete the expense with the ID number: "))
-        delete_expense = expenses.pop(f"{delete_text}")
+        delete_text = input("Delete the expense with the ID number: ")
+        delete_expense = expenses.pop(delete_text)
         
-        print(f"The deleted expense is {delete_expense}")
-        time.sleep(5)
+        print(f"The deleted expense is :")
+        display_expense(delete_expense)
+        while True:
+            try:
+                final_delete = input(f"Are you sure you want to permanently delete the expense with the ID number {delete_text}? (y/n)")
+    
+                if not final_delete.strip() or any(char.isdigit() for char in final_delete):
+                    raise ValueError("Invalid input! Numbers or empty text are not allowed.")
+                allowed_words = ["y","n"]
+                if final_delete.lower() not in allowed_words:
+                    raise ValueError(f"Please choose from: {', '.join(allowed_words)}")
+    
+            except ValueError as e:
+                print(f"Error: {e}")
+                continue
+    
+            break
+        if final_delete == "y":
+            storage.save_expense(expenses, "expenses.json")
+            print("\n")
+            print(f"Success! Your expense is permanently deleted successfully")
+            time.sleep(2)
+        else:
+            print("The expense is not permanently deleted\nIt would be retrieved after the re-run of the program")
     if choice == 6:
         break
