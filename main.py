@@ -63,16 +63,19 @@ def date_generator():
     return expense_date
 
 def view_expense(expenses):
-    
-    print("="*102)
-    print(f"| ID{'':>5} | DATE{'':>10} | AMOUNT{'':>10} | CATEGORY{'':>15} | DESCRIPION{'':>16} |")
-    print("|","="*98,"|", end="")
-    print("")
+    if len(expenses) == 0:
+        print("No expense found!")
 
-    for key in expenses:
+    else:
+        print("="*102)
+        print(f"| ID{'':>5} | DATE{'':>10} | AMOUNT{'':>10} | CATEGORY{'':>15} | DESCRIPION{'':>16} |")
+        print("|","="*98,"|", end="")
+        print("")
 
-        print(f"| {key:<7} | {expenses[key]["Date"]:<15}| {expenses[key]["Amount"]:<16} | {expenses[key]["Category"]:<23} | {expenses[key]["Description"]:<26} |")
-    print("="*102)
+        for key in expenses:
+
+            print(f"| {key:<7} | {expenses[key]["Date"]:<15}| {expenses[key]["Amount"]:<16} | {expenses[key]["Category"]:<23} | {expenses[key]["Description"]:<26} |")
+        print("="*102)
 
 
 # Collection of expenses
@@ -187,33 +190,29 @@ while True:
         print("\n")
         while True:
             try:
-                back = input('Would that be all for now? (y/n): ')
+                back = input('Type "back" to return to the main menu: ').strip().lower()
     
-                if not back.strip() or any(char.isdigit() for char in back):
-                    raise ValueError("Invalid input! Numbers or empty text are not allowed.")
-                allowed_words = ["y", "n"]
-
-                if back.lower() not in allowed_words:
-                    raise ValueError(f"Please choose from: {', '.join(allowed_words)}")
+                if back != "back":
+                    raise ValueError(f'Please type "back" when you are done viewing the expenses: ')
     
             except ValueError as e:
                 print(f"Error: {e}")
                 continue
     
             break
-        if back == 'y':
-            print("")
         
     if choice == 3:
         print("View spending expense")
+
     if choice == 4:
         print("View category expense")
+        
     if choice == 5:
         clear_terminal()
         header("Delete Expense")
         print("\n")
         view_expense(expenses)
-        print()
+        print("\n")
         delete_text = int(input("Delete the expense with the ID number: "))
         delete_expense = expenses.pop(f"{delete_text}")
         
