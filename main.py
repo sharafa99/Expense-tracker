@@ -7,10 +7,12 @@ import time
 import datetime
 
 #Header design
-def header(head):
-    print("="*40)
-    print(f"             {head}               ")
-    print("="*40)
+def header(text):
+    space = int((50-len(text))/2)
+    print("="*50,)
+    print(" "*space, end="")
+    print(f"{text}")
+    print("="*50)
 
 # Clear terminal
 def clear_terminal():
@@ -206,14 +208,13 @@ while True:
         header("Spending Summary")
         print("\n")
 
-        total_amount = expense_manager.calculate_total(expenses)
-        number_of_expenses = expense_manager.calculate_number_of_expenses(expenses)
-        average_expense = expense_manager.calculate_average(total_amount, number_of_expenses)
-        spending_summary = expense_manager.building_spending_summary(total_amount, number_of_expenses, average_expense)
+        spending_summary = expense_manager.build_spending_summary(expenses)
 
-        print(f"Total expenses:{'':>10} ${spending_summary["Total spending"]}")
+        print(f"Total expenses:{'':>10} ₦ {spending_summary["Total spending"]}")
+        print()
         print(f"Number of expenses:{'':>6} {spending_summary["Number of expenses"]}")
-        print(f"Average expense:{'':>9} {spending_summary["Average expense"]}")
+        print()
+        print(f"Average expense:{'':>9} ₦ {spending_summary["Average expense"]}")
         print("\n")
 
         while True:
@@ -229,9 +230,33 @@ while True:
     
             break
         
-
     if choice == 4:
-        print("View category expense")
+        clear_terminal()
+        header("View Category Summary")
+        print("\n")
+        category_totals = expense_manager.calculate_category_totals(expenses)
+
+        if not category_totals:
+            print("No expenses found.")
+            print()
+        else:
+            for key in category_totals:
+                print(f"{key:<25} ₦ {category_totals[key]}")
+
+            print("\n")
+        while True:
+            try:
+                back = input('Type "back" to return to the main menu: ').strip().lower()
+    
+                if back != "back":
+                    raise ValueError(f'Please type "back" to return to the main menu.')
+    
+            except ValueError as e:
+                print(f"Error: {e}")
+                continue
+    
+            break
+        
 
     if choice == 5:
         clear_terminal()
@@ -239,14 +264,15 @@ while True:
         print("\n")
         view_expense(expenses)
         print("\n")
-        delete_text = input("Delete the expense with the ID number: ")
-        delete_expense = expenses.pop(delete_text)
+        expense_id = input("Delete the expense with the ID number: ")
+        # delete_expense = expenses.pop(expense_id)
+        latest_expenses, deleted_expense = expense_manager.delete_expense(expenses, expense_id)
         
         print(f"The deleted expense is :")
-        display_expense(delete_expense)
+        display_expense(deleted_expense)
         while True:
             try:
-                final_delete = input(f"Are you sure you want to permanently delete the expense with the ID number {delete_text}? (y/n)")
+                final_delete = input(f"Are you sure you want to permanently delete the expense with the ID number {expense_id}? (y/n): ")
     
                 if not final_delete.strip() or any(char.isdigit() for char in final_delete):
                     raise ValueError("Invalid input! Numbers or empty text are not allowed.")
@@ -260,11 +286,14 @@ while True:
     
             break
         if final_delete == "y":
+            expenses = latest_expenses
             storage.save_expense(expenses, "expenses.json")
             print("\n")
             print(f"Success! Your expense is permanently deleted successfully")
             time.sleep(2)
         else:
-            print("The expense is not permanently deleted\nIt would be retrieved after the re-run of the program")
+            print("Deleting the expense was not successful")
+            time.sleep(5)
+
     if choice == 6:
         break
